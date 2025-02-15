@@ -43,17 +43,25 @@ def from_hex(hexdigits):
 
 
 def invert_color(len, line):
-    regge = "^[0-9A-Fa-f]{" + str(len) + "}[^0-9a-fA-F]"
-    p = re.compile(regge)
+    regge1 = "^[0-9A-F]{" + str(len) + "}[^0-9a-fA-F]"
+    regge2 = "^[0-9a-f]{" + str(len) + "}[^0-9a-fA-F]"
+    p1 = re.compile(regge1)
+    p2 = re.compile(regge2)
     tokens = line.split("#")
     ret = tokens.pop(0)
     for tok in tokens:
-        m = p.search(tok)
-        if m:
-            val = from_hex("f" * len) - from_hex("0x" + m.group()[:-1])
+        m1 = p1.search(tok)
+        m2 = p2.search(tok)
+        if m1:
+            val = from_hex("f" * len) - from_hex("0x" + m1.group()[:-1])
+            ret += "#" + f"{val:#0{len+2}x}"[2:] + tok[len:]
+        elif m2:
+            val = from_hex("f" * len) - from_hex("0x" + m2.group()[:-1])
             ret += "#" + f"{val:#0{len+2}x}"[2:] + tok[len:]
         else:
             ret += "#" + tok
+    ret = re.sub("PaleMoon", "PaleSun", ret);
+    ret = re.sub("palemoon", "palesun", ret);
     return ret
 
 
@@ -64,7 +72,6 @@ def process_binary(src, dst):
 
 
 def process_file(filename):
-    return ""
     fp1 = open(filename, "r")
     lines = fp1.readlines()
     output = ""
